@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+	<meta name="description" content="The game of Tic-Tac-Toe that could work with 3X3 to 100X100 row/columns">
+	<head>
+		<h1>Tic Tac Toe</h1>
+			<table border=1 cellpadding=3>
+				<tr>
+				<th>Player</th>
+				<th>Wins</th>
+				</tr>
+				<tr>
+				<th class=player>
+				<img src="http://i.istockimg.com/file_thumbview_approve/16908325/2/stock-illustration-16908325-human-cannonball-cartoon-2-circus-carnival.jpg" alt="Human" height="42" width="42">
+				</th>
+				<td align=right><input type=button name=xWon id=xWon class=winstat value="0"></td>
+				</tr>
+				<tr>
+				<th class=player>
+				<img src="http://thumbs.dreamstime.com/z/computer-cartoon-shield-22985095.jpg" alt="computer" height="42" width="42">
+				</th>
+				<td align=right><input type=button name=oWon id=oWon class=winstat value="0"></td>
+				</table>
+				</td></tr><br><br>
+			</table>
+<style>
+{
+  -webkit-box-sizing: border-box; 
+  -moz-box-sizing: border-box;  
+  box-sizing: border-box; 
+}
+
+select {
+    padding:3px;
+    margin: 0;
+    -webkit-border-radius:4px;
+    -moz-border-radius:4px;
+    border-radius:4px;
+    -webkit-box-shadow: 0 3px 0 #ccc, 0 -1px #fff inset;
+    -moz-box-shadow: 0 3px 0 #ccc, 0 -1px #fff inset;
+    box-shadow: 0 3px 0 #ccc, 0 -1px #fff inset;
+    background: #f8f8f8;
+    color:#888;
+    border:none;
+    outline:none;
+    display: inline-block;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+    cursor:pointer;
+    width:100px;
+}
+
+.minContainer {
+    padding: 20px;
+    padding-right: 30px;
+    position: absolute;
+	border:thin black ridge;
+	background-color:green;
+}
+
+table {
+    border-collapse:collapse;
+    table-layout: fixed;
+    border-spacing: 0;
+}
+.td {
+    border: 2px solid #cccccc;
+    font-size:20px;
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    color:#ccc;
+    line-height: 1.428571429;
+    width: 30px;
+    height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    text-align: center;
+}
+
+.X{
+    background-color: #FF8362;    
+}
+.winstat {
+ color:black;
+ background-color:white;
+ border:none;
+}
+.player {
+ font-family:Courier New,Courier,monospaced;
+ font-weight:bold;
+ font-size:150%;
+}
+</style>
+<script type="text/javascript" language=javascript><!--   
+//************************************************************// 
+// Begin variable listing
+// Initialize required variables
+//************************************************************// 
+var turn = 'X';
+var score = {
+    'X': 0,
+    'O': 0
+};
+var gridValue = 0;
+var xWon = 0;
+var oWon = 0;
+var drawGame = 0;
+
+function fnLoad() {
+	//************************************************************// 
+	// Function called when page is loading
+	// 1. Initialize dropdown list to 3X3 to 100X100
+	// 2. Create eventlistener for cell click
+	//************************************************************// 
+    var select = document.getElementById("grid");
+    for (i = 3; i <= 100; i += 1) {
+        var option = document.createElement('option');
+        select.options[select.options.length] = new Option(i + ' X ' + i, i);
+    }	
+    addEvent(document.getElementById("game"), "click", fnChoose);
+	addEvent(document.getElementById("game"), "click",timout); 
+    fnNewGame();
+}
+
+function addEvent(element, eventName, callback) {
+	//************************************************************// 
+	// Create events
+	//************************************************************//
+    if (element.addEventListener) {
+        element.addEventListener(eventName, callback, false);
+    } else if (element.attachEvent) {
+        element.attachEvent("on" + eventName, callback);
+    }
+}
+
+function fnChoose(e) {
+	//*******************************************************************// 
+	// Function called when human clicks on a cell
+	// 1. Depending on the first or 2nd turn, fill cell with 'X' or 'O'
+	// 2. Identify winner/draw status
+	// 3. Initiate new game when status is either win/draw
+	//******************************************************************//
+    if (e.target && e.target.nodeName == "TD") {
+        var targetElement = document.getElementById(e.target.id);
+        var prevTurn;
+        if ((targetElement.className).indexOf("disabled") == -1) {
+            targetElement.innerHTML = turn;
+            targetElement.classList.add('disabled');
+            targetElement.classList.add(turn);
+			
+            score[turn] += 1;
+            prevTurn = turn;
+            turn = turn === "X" ? "O" : "X";
+            if (fndecide(targetElement, prevTurn)) {
+				alert("You Win");
+				xWon = xWon + 1;
+				drawStats();				
+                fnNewGame();
+            } else if ((score['X'] + score['O']) == (gridValue * gridValue)) {
+				
+                alert('Draw!');
+				drawGame = drawGame+1;
+                fnNewGame();
+            }
+        }
+    }
+}
+function timout(e) {
+	//*******************************************************************// 
+	// Function called after fnChoose due to cell click.
+	// Introduce 400ms delay before computer fills the empty cell.
+	//******************************************************************//
+	setTimeout(function() {fnRandomfill(e);;},400);        		
+}
+function fnRandomfill(e) {	
+	//*******************************************************************// 
+	// Function called for computer to fill the cell
+	// 1. Identify empty cells on random.
+	// 2. Depending on the first or 2nd turn, fill cell with 'X' or 'O'
+	// 3. Identify winner/draw status
+	// 4. Initiate new game when status is either win/draw
+	//******************************************************************//
+	var noofcells=gridValue * gridValue
+	var randmove, targetElement
+	var currcell = (e.target.id).substring(2)			
+    if (e.target && e.target.nodeName == "TD") {  
+	do
+		{
+			randmove = Math.ceil(Math.random()*noofcells)
+			targetElement = document.getElementById("li"+randmove);
+		}	while ((randmove==currcell) || (targetElement.className).indexOf("disabled") != -1)
+        var prevTurn;
+        if ((targetElement.className).indexOf("disabled") == -1) {
+            targetElement.innerHTML = turn;
+            targetElement.classList.add('disabled');
+            targetElement.classList.add(turn);
+			
+            score[turn] += 1;
+            prevTurn = turn;
+            turn = turn === "X" ? "O" : "X";
+            if (fndecide(targetElement, prevTurn)) {
+				oWon = oWon + 1;
+				alert("I Win");
+				drawStats();				
+                fnNewGame();
+            } else if ((score['X'] + score['O']) == (gridValue * gridValue)) {
+				
+                alert('Draw!');
+				drawGame = drawGame+1;
+                fnNewGame();
+            }
+        }
+    }
+}
+
+function fndecide(targetElement, prevTurn) {
+	//*******************************************************************// 
+	// Function called to decide the turn
+	//******************************************************************//
+    var UL = document.getElementById('game');
+    var elements, i, j, cnt;
+    if (score[prevTurn] >= gridValue) {
+        var classes = targetElement.className.split(/\s+/);
+        for (i = 0; i < classes.length; i += 1) {
+            cnt = 0;
+            if (classes[i].indexOf('row') !== -1 || classes[i].indexOf('col') !== -1 || classes[i].indexOf('dia') !== -1) {
+                elements = UL.getElementsByClassName(classes[i]);
+                for (j = 0; j < elements.length; j += 1) {
+                    if (elements[j].innerHTML == prevTurn) {
+                        cnt += 1;
+                    }
+                }
+                if (cnt == gridValue) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+function fnResetScore() {
+	//*******************************************************************// 
+	// Function called when reset score button is called
+	// Reset score values
+	//******************************************************************//
+	score = {
+			'X': 0,
+			'O': 0
+		};
+	xWon = 0;
+	oWon = 0;
+	drawGame = 0;
+	drawStats();
+}
+function fnNewGame() {
+	//*******************************************************************// 
+	// Function called for creating new game.
+	// 1. Initialise required variables.
+	// 2. Create Grid.
+	//******************************************************************//
+	score = {
+			'X': 0,
+			'O': 0
+		};
+    var gameUL = document.getElementById("game");
+    if (gameUL.innerHTML !== '') {
+        gameUL.innerHTML = "";        
+        turn = 'X';
+        gridValue = 0;
+    }
+    var select = document.getElementById("grid");
+    gridValue = select.options[select.selectedIndex].value;
+    var i, j, li, k = 0,
+        classLists;
+    var gridAdd = +gridValue + 1;
+
+    for (i = 1; i <= gridValue; i += 1) {
+        tr = document.createElement('tr');
+        for (j = 1; j <= gridValue; j += 1) {
+            k += 1;
+            li = document.createElement('td');
+            li.setAttribute("id", 'li' + k);
+
+            classLists = 'td row' + i + ' col' + j;
+
+            if (i === j) {
+                classLists = 'td row' + i + ' col' + j + ' dia0';
+            }
+
+            if ((i + j) === gridAdd) {
+                classLists = 'td row' + i + ' col' + j + ' dia1';
+            }
+
+            if (!isEven(gridValue) && (Math.round(gridValue / 2) === i && Math.round(gridValue / 2) === j))
+                classLists = 'td row' + i + ' col' + j + ' dia0 dia1';
+
+            li.className = classLists;
+            tr.appendChild(li);
+
+        }
+        gameUL.appendChild(tr);
+    }
+}
+
+
+function isEven(value) {
+    if (value % 2 == 0)
+        return true;
+    else
+        return false;
+}
+
+function drawStats(){
+	//*******************************************************************// 
+	// Function called to draw the status of winner
+	// Set the score in cookies so that it can be reloaded next time
+	//******************************************************************//
+    var xw = document.getElementById("xWon")
+	var ow = document.getElementById("oWon")
+	var totalGames = xWon + oWon ;
+    xw.value = xWon;
+    ow.value = oWon;
+    
+    var cookie = ':' + xWon + ':' + oWon ;
+    var expires = new Date();
+    // cookie expires in one year
+    expires.setTime(expires.getTime() + 365 * 24 * 60 * 60 * 1000);
+    document.cookie = (
+        'tictactoeStats' + '=' +
+        escape(cookie) +
+        '; expires=' + expires.toGMTString()
+    );
+}
+
+function getCookie(name) {
+//*******************************************************************// 
+// Function get the scores stored in cookies
+//******************************************************************//	
+  var prefix = name + "=";
+  var begin = document.cookie.indexOf("; " + prefix);
+  if (begin == -1) {
+    begin = document.cookie.indexOf(prefix);
+    if (begin != 0) return null;
+  } else
+    begin += 2;
+  var end = document.cookie.indexOf(";", begin);
+  if (end == -1)
+    end = document.cookie.length;
+  return unescape(document.cookie.substring(begin + prefix.length, end));
+}
+
+function loadStats(){
+//*******************************************************************// 
+// Function load the scores stored in cookies
+//******************************************************************//	
+    var cookie = getCookie('tictactoeStats');
+    if (cookie != null && cookie.length > 1){
+        var stats = cookie.substring(1,cookie.length);
+        if (stats != null){
+            var statsSplit = stats.split(':');
+            var temp;
+            if (statsSplit.length == 2){
+                var re = new RegExp("^([0-9]*)$");
+                if (re.test(statsSplit[0])) xWon = eval(statsSplit[0]);
+                if (re.test(statsSplit[1])) oWon = eval(statsSplit[1]);
+                drawStats();
+            }
+        }
+    }
+}
+
+//--></script>
+</head>
+<body onload="fnLoad();loadStats();">
+        <div class="container">
+                <div>
+                        <select id="grid">
+                        </select>
+                        <button name="NewGame" class="newGame" value="Start a New Game" onClick="fnNewGame()">Start a New Game</button>
+						<button name="Reset_Score" class="newGame" value="Reset Scores" onClick="fnResetScore()">Reset Scores</button>
+                </div><br>
+                <div class="minContainer">
+                        <table class="row" id="game"></table>
+                </div>				
+        </div>
+		
+</body>
+</html>

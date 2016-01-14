@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Print Matrix to Spiral form</title>
+	</head>
+	<body onload="printSpiralMat();">		
+		<script type="text/javascript" language=javascript>
+			function printSpiralMat()
+				{
+					/* Function to print given Matrix by exmaining in spiral order  */
+					var matVal=[[11, 12, 13, 14, 15],[21, 22, 23, 24, 25],[31, 32, 33, 34, 35],[41, 42, 43, 44, 45]];
+					var startRowIx=0, endRowIx, startColIx=0, endColIx, outVal=[];
+					endRowIx=matVal.length;
+					endColIx=matVal[0].length;
+				 
+					while (startRowIx < endRowIx && startColIx < endColIx)
+					{
+						
+						for (var i = startColIx; i < endColIx; i++)
+						{
+							outVal.push(matVal[startRowIx][i])
+						}
+						startRowIx++;
+						
+						for (var i = startRowIx; i < endRowIx; i++)
+						{
+							outVal.push(matVal[i][endColIx-1]);
+						}
+						endColIx--;
+						
+						if ( startRowIx < endRowIx)
+						{
+							for (i = endColIx-1; i >= startColIx; i--)
+							{
+								outVal.push(matVal[endRowIx-1][i]);
+							}
+							endRowIx--;
+						}
+						
+						if ( startColIx < endColIx)
+						{
+							for (i = endRowIx; i >= startRowIx; i--)
+							{
+								outVal.push(matVal[i][endColIx-1]);
+							}
+							endColIx--;
+						}
+				    }
+					console.log(outVal.join(" "));
+				}
+		</script>
+	</body>
+</html>

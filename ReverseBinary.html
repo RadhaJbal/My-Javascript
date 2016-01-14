@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Reversed Binary Numbers</title>
+	</head>
+	<body>
+		Input: 
+		<input type="text" id="inpnum" name="inpnum" onkeyup="revBinNum()"/>
+		Output:
+		<input type="text" id="outnum" name="outnum" disabled/>
+		<p id="errTxt"></p>
+		<br>
+		
+		<script type="text/javascript" language=javascript>
+			function revBinNum()
+				{
+					/* This program reverses numbers in binary */
+					var tmpBin, decInp, revBin, errDetails;
+					errDetails="";
+					decInp=document.getElementById('inpnum').value;
+					if (decInp>1000000000 || decInp<1 || isNaN(decInp) & (event.keyCode!=8 || event.keyCode!=46)) 
+					{
+					/* Validate input. Input must be integer between 1 to 1000000000 */
+						errDetails = "Please enter Valid Number as input between 1 to 1000000000"
+						document.getElementById('inpnum').style.color = "red";
+						document.getElementById('outnum').value="";	
+					}
+					else
+					{
+					/* Convert given input to binary, reverse it and convert back to integer */
+						document.getElementById('inpnum').style.color = "black";
+						tmpBin=(decInp >> 0).toString(2);					
+						revBin=parseInt(tmpBin.split("").reverse().join(""),2);
+						document.getElementById('outnum').value=revBin.toString(10);
+					}
+					document.getElementById('errTxt').innerHTML=errDetails;
+					return;
+				}	
+		</script>
+	</body>
+</html>
